@@ -21,6 +21,7 @@ export default function HomeScreen({ navigation }) {
         headers: { Authorization: `Bearer ${WEBFLOW_API_TOKEN}` }
       });
       const productJson = await productResponse.json();
+      console.log("DIT IS DE PRODUCT DATA:", productJson.items[0].fieldData);
       
       const newsResponse = await fetch(`https://api.webflow.com/v2/collections/${NEWS_COLLECTION_ID}/items`, {
         headers: { Authorization: `Bearer ${WEBFLOW_API_TOKEN}` }

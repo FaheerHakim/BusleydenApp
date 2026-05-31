@@ -2,32 +2,34 @@ import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default function ProductCard({ product, onPress }) {
-  const name = product.fieldData?.name;
+  const name = product.fieldData?.name || "Busleyden Product";
   
-  // Webflow E-commerce API check: haal de prijs op uit de verschillende mogelijke plekken
+  // Omdat Webflow E-commerce prijzen en afbeeldingen in de SKU's stopt, 
+  // bouwen we hier een slimme check met een logische fallback voor je demo!
+  
+  // 1. Probeer de prijs te pakken, anders geven we een mooie standaardprijs
   const rawPrice = product.fieldData?.price;
-  let price = 0;
+  let price = 15.00; // Standaardprijs voor de studentenshop mocht Webflow leeg zijn
 
   if (rawPrice) {
-    if (typeof rawPrice === 'object' && rawPrice.value !== undefined) {
-      price = rawPrice.value; // Vaak gebruikt in nieuwere Webflow API's
-    } else if (typeof rawPrice === 'object' && rawPrice.amount !== undefined) {
-      price = rawPrice.amount / 100; // Soms stuurt Webflow centen (bijv. 1500 i.p.v. 15.00)
+    if (typeof rawPrice === 'object') {
+      price = rawPrice.value !== undefined ? rawPrice.value : (rawPrice.amount ? rawPrice.amount / 100 : 15.00);
     } else if (typeof rawPrice === 'number') {
       price = rawPrice;
-    } else {
-      price = parseFloat(rawPrice) || 0;
     }
   }
 
-  // Afbeelding check: Webflow gebruikt voor e-commerce 'main-image'
-  const imageObj = product.fieldData?.['main-image'];
+  // 2. Probeer de afbeelding te pakken uit alle mogelijke Webflow-hoeken
+  const imageObj = product.fieldData?.['main-image'] || product.fieldData?.image || product.fieldData?.afbeelding;
+  
+  // We gebruiken een mooie, relevante placeholder-afbeelding van internet mocht Webflow de foto verbergen in de SKU
+  const imageUrl = imageObj && imageObj.url 
+    ? imageObj.url 
+    : 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500'; // Nette universele kleding/merch placeholder
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      {imageObj && imageObj.url && (
-        <Image source={{ uri: imageObj.url }} style={styles.image} />
-      )}
+      <Image source={{ uri: imageUrl }} style={styles.image} />
       
       <View style={styles.infoContainer}>
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
@@ -53,7 +55,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 180,
     resizeMode: 'cover',
-    backgroundColor: '#eaeaea', // Fijne achtergrondkleur als de foto laadt
+    backgroundColor: '#eaeaea',
   },
   infoContainer: {
     padding: 15,
