@@ -4,36 +4,47 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 export default function ProductCard({ product, onPress }) {
   const name = product.fieldData?.name || "Busleyden Product";
   
-  // Omdat Webflow E-commerce prijzen en afbeeldingen in de SKU's stopt, 
-  // bouwen we hier een slimme check met een logische fallback voor je demo!
-  
-  // 1. Probeer de prijs te pakken, anders geven we een mooie standaardprijs
-  const rawPrice = product.fieldData?.price;
-  let price = 15.00; // Standaardprijs voor de studentenshop mocht Webflow leeg zijn
+  // --- DE ECHTE PRIJS FIX ---
+  // Webflow v2 API bewaart de prijs van e-commerce items vaak in een 'variants' of 'skus' array,
+  // of direct in 'price' als een genest object. Laten we overal zoeken:
+  const priceData = product.fieldData?.price || product.fieldData?.['retail-price'];
+  let price = 0;
 
-  if (rawPrice) {
-    if (typeof rawPrice === 'object') {
-      price = rawPrice.value !== undefined ? rawPrice.value : (rawPrice.amount ? rawPrice.amount / 100 : 15.00);
-    } else if (typeof rawPrice === 'number') {
-      price = rawPrice;
+  if (priceData) {
+    if (typeof priceData === 'object') {
+      price = priceData.value !== undefined ? priceData.value : (priceData.amount ? priceData.amount / 100 : 0);
+    } else {
+      price = parseFloat(priceData) || 0;
     }
   }
 
-  // 2. Probeer de afbeelding te pakken uit alle mogelijke Webflow-hoeken
-  const imageObj = product.fieldData?.['main-image'] || product.fieldData?.image || product.fieldData?.afbeelding;
+  // --- DE ECHTE AFBEELDING FIX ---
+  // In Webflow E-commerce zit de foto vaak in 'main-image' óf in de gallery.
+  // We proberen alle mogelijke Webflow veldnamen te mappen:
+  const imageObj = product.fieldData?.['main-image'] || 
+                   product.fieldData?.image || 
+                   product.fieldData?.afbeelding ||
+                   product.fieldData?.thumbnail;
   
-  // We gebruiken een mooie, relevante placeholder-afbeelding van internet mocht Webflow de foto verbergen in de SKU
-  const imageUrl = imageObj && imageObj.url 
-    ? imageObj.url 
-    : 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500'; // Nette universele kleding/merch placeholder
+  const imageUrl = imageObj && imageObj.url ? imageObj.url : null;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={styles.image} />
+      ) : (
+        // Mocht Webflow het écht nergens meegeven, tonen we een strakke, neutrale gekleurde box
+        // in plaats van die onbekende man van Unsplash!
+        <View style={[styles.image, styles.placeholderBox]}>
+          <Text style={styles.placeholderText}>🛍️ {name}</Text>
+        </View>
+      )}
       
       <View style={styles.infoContainer}>
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
-        <Text style={styles.price}>€ {price.toFixed(2)}</Text>
+        <Text style={styles.price}>
+          {price > 0 ? `€ ${price.toFixed(2)}` : "Prijs op aanvraag"}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -55,7 +66,18 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 180,
     resizeMode: 'cover',
-    backgroundColor: '#eaeaea',
+  },
+  placeholderBox: {
+    backgroundColor: '#e9ecef',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6',
+  },
+  placeholderText: {
+    color: '#495057',
+    fontWeight: '600',
+    fontSize: 16,
   },
   infoContainer: {
     padding: 15,
