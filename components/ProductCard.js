@@ -2,15 +2,25 @@ import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default function ProductCard({ product, onPress }) {
-  // We halen handmatig de juiste velden op uit fieldData
   const name = product.fieldData?.name;
   
-  // Webflow E-commerce zet de prijs vaak in 'price' of 'price' object. 
-  // We vangen beide mogelijkheden op:
-  const priceValue = product.fieldData?.price?.value || product.fieldData?.price;
-  const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue) || 0;
+  // Webflow E-commerce API check: haal de prijs op uit de verschillende mogelijke plekken
+  const rawPrice = product.fieldData?.price;
+  let price = 0;
 
-  // De afbeelding heet 'main-image' in jouw Webflow
+  if (rawPrice) {
+    if (typeof rawPrice === 'object' && rawPrice.value !== undefined) {
+      price = rawPrice.value; // Vaak gebruikt in nieuwere Webflow API's
+    } else if (typeof rawPrice === 'object' && rawPrice.amount !== undefined) {
+      price = rawPrice.amount / 100; // Soms stuurt Webflow centen (bijv. 1500 i.p.v. 15.00)
+    } else if (typeof rawPrice === 'number') {
+      price = rawPrice;
+    } else {
+      price = parseFloat(rawPrice) || 0;
+    }
+  }
+
+  // Afbeelding check: Webflow gebruikt voor e-commerce 'main-image'
   const imageObj = product.fieldData?.['main-image'];
 
   return (
@@ -43,6 +53,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 180,
     resizeMode: 'cover',
+    backgroundColor: '#eaeaea', // Fijne achtergrondkleur als de foto laadt
   },
   infoContainer: {
     padding: 15,
