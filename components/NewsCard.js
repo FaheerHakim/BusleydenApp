@@ -1,19 +1,21 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
-// We vangen 'item' (het nieuwsartikel) en 'onPress' op via props
 export default function NewsCard({ item, onPress }) {
-  const { name, image, 'published-on': publishedOn } = item.fieldData;
+  const name = item.fieldData?.name;
+  
+  // Jouw Webflow gebruikt de Nederlandse veldnamen 'afbeelding' en 'datum'
+  const imageObj = item.fieldData?.afbeelding;
+  const dateValue = item.fieldData?.datum;
 
-  // Datum netjes converteren naar een leesbare tekst
-  const formattedDate = publishedOn 
-    ? new Date(publishedOn).toLocaleDateString('nl-BE') 
+  const formattedDate = dateValue 
+    ? new Date(dateValue).toLocaleDateString('nl-BE') 
     : '';
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      {image && image.url && (
-        <Image source={{ uri: image.url }} style={styles.image} />
+      {imageObj && imageObj.url && (
+        <Image source={{ uri: imageObj.url }} style={styles.image} />
       )}
       
       <View style={styles.infoContainer}>
