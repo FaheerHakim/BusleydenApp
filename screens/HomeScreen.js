@@ -9,8 +9,8 @@ import NewsCard from '../components/NewsCard';
 
 const SITE_ID = '6a0cb8dcdf02ab80c4c2b4de';
 const NEWS_COLLECTION_ID = '6a0f86111b7a24ea0e0ee305';
+const CATEGORY_COLLECTION_ID = '6a11a6d7562485b39b87f883';
 
-// Sorteeropties
 const PRODUCT_SORT_OPTIONS = [
   { label: 'Naam A→Z', value: 'name_asc' },
   { label: 'Naam Z→A', value: 'name_desc' },
@@ -26,14 +26,13 @@ const NEWS_SORT_OPTIONS = [
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [news, setNews] = useState([]);
+  const [categories, setCategories] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Product filters
   const [productSearch, setProductSearch] = useState('');
   const [productSort, setProductSort] = useState('name_asc');
   const [productCategory, setProductCategory] = useState('all');
 
-  // Nieuws filters
   const [newsSearch, setNewsSearch] = useState('');
   const [newsSort, setNewsSort] = useState('name_asc');
   const [newsCategory, setNewsCategory] = useState('all');
@@ -54,8 +53,20 @@ export default function HomeScreen({ navigation }) {
       );
       const newsJson = await newsRes.json();
 
+      const catRes = await fetch(
+        `https://api.webflow.com/v2/collections/${CATEGORY_COLLECTION_ID}/items`,
+        { headers: { Authorization: `Bearer ${WEBFLOW_API_TOKEN}` } }
+      );
+      const catJson = await catRes.json();
+
+      const catMap = {};
+      (catJson.items || []).forEach(cat => {
+        catMap[cat.id] = cat.fieldData?.name || cat.id;
+      });
+
       setProducts(productJson.items || []);
       setNews(newsJson.items || []);
+      setCategories(catMap);
     } catch (error) {
       console.error('Fout bij ophalen data:', error);
     } finally {
@@ -63,17 +74,14 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  // Unieke categorieën uit producten halen
   const productCategories = ['all', ...new Set(
     products.map(p => p.product?.fieldData?.category?.[0]).filter(Boolean)
   )];
 
-  // Unieke categorieën uit nieuws halen
   const newsCategories = ['all', ...new Set(
     news.map(n => n.fieldData?.category).filter(Boolean)
   )];
 
-  // Producten filteren + sorteren
   const filteredProducts = products
     .filter(p => {
       const name = p.product?.fieldData?.name?.toLowerCase() || '';
@@ -94,7 +102,6 @@ export default function HomeScreen({ navigation }) {
       return 0;
     });
 
-  // Nieuws filteren + sorteren
   const filteredNews = news
     .filter(n => {
       const name = n.fieldData?.name?.toLowerCase() || '';
@@ -127,7 +134,6 @@ export default function HomeScreen({ navigation }) {
       {/* ── PRODUCTEN ── */}
       <Text style={styles.sectionTitle}>Onze Producten ({filteredProducts.length})</Text>
 
-      {/* Zoekbalk producten */}
       <TextInput
         style={styles.searchInput}
         placeholder="🔍 Zoek een product..."
@@ -135,7 +141,6 @@ export default function HomeScreen({ navigation }) {
         onChangeText={setProductSearch}
       />
 
-      {/* Sortering producten */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {PRODUCT_SORT_OPTIONS.map(opt => (
           <TouchableOpacity
@@ -150,7 +155,6 @@ export default function HomeScreen({ navigation }) {
         ))}
       </ScrollView>
 
-      {/* Filter op categorie producten */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {productCategories.map(cat => (
           <TouchableOpacity
@@ -159,7 +163,7 @@ export default function HomeScreen({ navigation }) {
             onPress={() => setProductCategory(cat)}
           >
             <Text style={[styles.chipText, productCategory === cat && styles.chipTextActive]}>
-              {cat === 'all' ? 'Alle' : cat}
+              {cat === 'all' ? 'Alle' : (categories[cat] || cat)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -182,7 +186,6 @@ export default function HomeScreen({ navigation }) {
       {/* ── NIEUWS ── */}
       <Text style={styles.sectionTitle}>Laatste Nieuws ({filteredNews.length})</Text>
 
-      {/* Zoekbalk nieuws */}
       <TextInput
         style={styles.searchInput}
         placeholder="🔍 Zoek een artikel..."
@@ -190,7 +193,6 @@ export default function HomeScreen({ navigation }) {
         onChangeText={setNewsSearch}
       />
 
-      {/* Sortering nieuws */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {NEWS_SORT_OPTIONS.map(opt => (
           <TouchableOpacity
@@ -205,16 +207,15 @@ export default function HomeScreen({ navigation }) {
         ))}
       </ScrollView>
 
-      {/* Filter op categorie nieuws */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {newsCategories.map(cat => (
           <TouchableOpacity
-            key={cat}
+            key={String(cat)}
             style={[styles.chip, newsCategory === cat && styles.chipActive]}
             onPress={() => setNewsCategory(cat)}
           >
             <Text style={[styles.chipText, newsCategory === cat && styles.chipTextActive]}>
-              {cat === 'all' ? 'Alle' : cat}
+              {cat === 'all' ? 'Alle' : (categories[cat] || cat)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -263,5 +264,4 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#0056b3' },
   chipText: { fontSize: 13, color: '#495057' },
   chipTextActive: { color: '#fff', fontWeight: 'bold' },
-  emptyText: { textAlign: 'center', color: '#adb5bd', marginTop: 20, fontSize: 15 },
-});
+  emptyText: { textAlign: 'center', color: '#adb5bd', marginTop: 20, fontSize: 15 },});
