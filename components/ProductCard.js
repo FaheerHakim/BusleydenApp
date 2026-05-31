@@ -2,32 +2,37 @@ import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default function ProductCard({ product, onPress }) {
-  const name = product.fieldData?.name || "Busleyden Product";
-  const slug = product.fieldData?.slug;
+const fieldData = product.product?.fieldData || {};
   
-  let price = 0;
-  let imageUrl = null;
+  // Naam
+  const name = fieldData.name || 'Busleyden Product';
 
-  // Pas hier de prijzen en afbeeldingen aan op basis van de slugs uit je Webflow!
-  if (slug === 'ba-sweater-met-kap-maat-m') {
-    price = 35.00;
-    imageUrl = 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500'; 
-  } else if (slug === 'ba-lippenbalsem') {
-    price = 2.50;
-    imageUrl = 'https://images.unsplash.com/photo-1617421753170-07bf27762df2?w=500';
-  } else {
-    // Standaardwaarden voor producten die je nog niet hebt toegevoegd in de if-lijst
-    price = 4.99;
-    imageUrl = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=500';
-  }
+  // Afbeelding — Webflow E-commerce: fieldData["main-image"]
+  const imageUrl = fieldData['main-image']?.url || null;
+
+  // Prijs — zit in product.skus[0].fieldData.price.value (in centen!)
+  const rawPrice = product.skus?.[0]?.fieldData?.price?.value;
+  const price = rawPrice != null ? (rawPrice / 100).toFixed(2) : null;
+
+  // Categorie (optioneel, voor later)
+  const category = fieldData.category || null;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      {imageUrl && <Image source={{ uri: imageUrl }} style={styles.image} />}
-      
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={styles.image} />
+      ) : (
+        <View style={[styles.image, styles.imagePlaceholder]}>
+          <Text style={styles.placeholderText}>Geen afbeelding</Text>
+        </View>
+      )}
       <View style={styles.infoContainer}>
-        <Text style={styles.name} numberOfLines={1}>{name}</Text>
-        <Text style={styles.price}>€ {price.toFixed(2)}</Text>
+        <Text style={styles.name} numberOfLines={2}>{name}</Text>
+        {price ? (
+          <Text style={styles.price}>€ {price}</Text>
+        ) : (
+          <Text style={styles.price}>Prijs onbekend</Text>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -50,9 +55,16 @@ const styles = StyleSheet.create({
     height: 180,
     resizeMode: 'cover',
   },
-  infoContainer: {
-    padding: 15,
+  imagePlaceholder: {
+    backgroundColor: '#e9ecef',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  placeholderText: {
+    color: '#adb5bd',
+    fontSize: 14,
+  },
+  infoContainer: { padding: 15 },
   name: {
     fontSize: 18,
     fontWeight: 'bold',
