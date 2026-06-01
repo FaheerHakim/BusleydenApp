@@ -7,6 +7,11 @@ export default function NewsDetailsScreen({ route }) {
   const name = item.fieldData?.name || 'Artikel';
   const imageObj = item.fieldData?.afbeelding;
 
+  const dateValue = item.fieldData?.datum;
+  const formattedDate = dateValue
+  ? new Date(dateValue).toLocaleDateString('nl-BE')
+  : '';
+
   return (
     <ScrollView style={styles.container}>
       {imageObj?.url ? (
@@ -18,6 +23,9 @@ export default function NewsDetailsScreen({ route }) {
       )}
 
       <View style={styles.content}>
+        {formattedDate ? (
+      <Text style={styles.date}>{formattedDate}</Text>
+         ) : null}
         <Text style={styles.title}>{name}</Text>
       </View>
     </ScrollView>
@@ -34,5 +42,14 @@ const styles = StyleSheet.create({
   },
   placeholderText: { color: '#adb5bd', fontSize: 16 },
   content: { padding: 20 },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#1a1a1a' },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#1a1a1a' 
+    
+  },
+  date: {
+  fontSize: 12,
+  color: '#666',
+  marginBottom: 8,
+  textTransform: 'uppercase',
+  fontWeight: '600',
+},
 });
