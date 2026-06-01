@@ -6,9 +6,11 @@ export default function CampusDetails({ route, navigation }) {
   const { item } = route.params || {};
   
   const name = item?.fieldData?.name || 'Onbekende Campus';
-  const beschrijving = item?.fieldData?.['beschrijving'] || 'Geen beschrijving beschikbaar voor deze campus.';
+
+  const ruweBeschrijving = item?.fieldData?.['beschrijving'] || 'Geen beschrijving beschikbaar voor deze campus.';
   
-  // 2. Jouw dynamische kleur! We pakken weer de kleur uit Webflow, met dezelfde blauwe back-up
+  const description = ruweBeschrijving.replace(/<[^>]*>/g, '');
+  
   const campusKleur = item?.fieldData?.kleur || '#0056b3';
 
   return (
