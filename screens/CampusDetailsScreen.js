@@ -6,7 +6,7 @@ export default function CampusDetails({ route, navigation }) {
   const { item } = route.params || {};
   
   const name = item?.fieldData?.name || 'Onbekende Campus';
-  const description = item?.fieldData?.description || 'Geen beschrijving beschikbaar voor deze campus.';
+  const beschrijving = item?.fieldData?.['beschrijving'] || 'Geen beschrijving beschikbaar voor deze campus.';
   
   // 2. Jouw dynamische kleur! We pakken weer de kleur uit Webflow, met dezelfde blauwe back-up
   const campusKleur = item?.fieldData?.kleur || '#0056b3';
@@ -20,7 +20,7 @@ export default function CampusDetails({ route, navigation }) {
         {/* De campusnaam in de juiste kleur */}
         <Text style={[styles.title, { color: campusKleur }]}>{name}</Text>
         
-        <Text style={styles.description}>{description}</Text>
+        <Text style={styles.description}>{beschrijving}</Text>
 
         {/* Een strakke knop om weer terug te gaan naar de homepagina */}
         <TouchableOpacity 
