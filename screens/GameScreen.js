@@ -51,7 +51,8 @@ export default function GameScreen({ navigation }) {
     if (timeLeft === 0) {
       gameActiveRef.current = false;
       Alert.alert('⏰ Tijd is om!', 'Helaas, je hebt de campussen niet op tijd gevonden. Probeer het nog eens!', [
-        { text: 'Opnieuw Proberen', onPress: initializeGame }
+        { text: 'Opnieuw Proberen', onPress: initializeGame },
+        { text: 'Terug naar Home', onPress: () => navigation.goBack() } // Sluit het scherm en gaat terug
       ]);
       return;
     }
