@@ -26,9 +26,8 @@ export default function NewsDetailsScreen({ route }) {
         {formattedDate ? (
       <Text style={styles.date}>{formattedDate}</Text>
          ) : null}
-        <Text style={styles.title}>{name}</Text>
-        {item.fieldData?.inhoud ? (
-        <Text style={styles.body}>{item.fieldData.inhoud}</Text>
+        {item.fieldData?.intro ? (
+      <Text style={styles.body}>{item.fieldData.intro}</Text>
          ) : null}
       </View>
     </ScrollView>
