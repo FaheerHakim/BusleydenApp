@@ -16,6 +16,9 @@ export default function GameScreen({ navigation }) {
   const [cards, setCards] = useState([]);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(45);
+  
+  // 🧠 NIEUW: Houdt de ID's bij van de kaarten die op dit moment worden omgedraaid (maximaal 2)
+  const [selectedCards, setSelectedCards] = useState([]);
 
   const initializeGame = () => {
     const shuffledCards = [...CAMPUS_PAIRS]
@@ -30,23 +33,69 @@ export default function GameScreen({ navigation }) {
     setCards(shuffledCards);
     setScore(0);
     setTimeLeft(45);
+    setSelectedCards([]); // Reset ook de geselecteerde kaarten bij herstart
   };
 
   useEffect(() => {
     initializeGame();
   }, []);
 
-  // ── 🛠️ JOUW NIEUWE KLIK-FUNCTIE ──
+  // ── 🛠️ GEUPDATETE KLIK-FUNCTIE MET MATCH-LOGICA ──
   const handleCardPress = (clickedId) => {
-    const updatedCards = cards.map((card) => {
-      // Als dit de kaart is waarop geklikt is, zetten we hem open (isFlipped: true)
+    // Vind de kaart waar op geklikt is
+    const targetCard = cards.find(c => c.id === clickedId);
+
+    // BROWSER GUARD: Klikken mag niet als:
+    // - Er al 2 kaarten openliggen (even wachten op het terugdraaien)
+    // - De kaart al open ligt (isFlipped)
+    // - De kaart al geraden is (isMatched)
+    if (selectedCards.length === 2 || targetCard.isFlipped || targetCard.isMatched) {
+      return;
+    }
+
+    // Stap 1: Draai de geklikte kaart visueel om
+    const updatedCards = cards.map(card => {
       if (card.id === clickedId) {
         return { ...card, isFlipped: true };
       }
-      return card; // De rest van de kaarten laten we zo
+      return card;
     });
-
     setCards(updatedCards);
+
+    // Stap 2: Voeg deze kaart toe aan ons tijdelijke keuzelijstje
+    const newSelection = [...selectedCards, clickedId];
+    setSelectedCards(newSelection);
+
+    // Stap 3: Als dit de TWEEDE kaart is, gaan we controleren!
+    if (newSelection.length === 2) {
+      const firstCard = cards.find(c => c.id === newSelection[0]);
+      const secondCard = targetCard; // Dat is de huidige kaart waar we net op klikten
+
+      if (firstCard.name === secondCard.name) {
+        // 🎉 MATCH!
+        setTimeout(() => {
+          setCards(prevCards => prevCards.map(card => {
+            if (card.id === firstCard.id || card.id === secondCard.id) {
+              return { ...card, isMatched: true }; // Ze blijven permanent open
+            }
+            return card;
+          }));
+          setScore(prevScore => prevScore + 1); // Score omhoog!
+          setSelectedCards([]); // Keuzelijst leegmaken voor de volgende beurt
+        }, 300);
+      } else {
+        // ❌ GEEN MATCH! Wacht 1 seconde en draai ze terug
+        setTimeout(() => {
+          setCards(prevCards => prevCards.map(card => {
+            if (card.id === firstCard.id || card.id === secondCard.id) {
+              return { ...card, isFlipped: false }; // Terug naar blauw draaien
+            }
+            return card;
+          }));
+          setSelectedCards([]); // Keuzelijst leegmaken voor de volgende beurt
+        }, 1000); // 1000 milliseconden = 1 seconde kijktijd
+      }
+    }
   };
 
   return (
@@ -62,15 +111,13 @@ export default function GameScreen({ navigation }) {
         {cards.map((card) => (
           <TouchableOpacity 
             key={card.id} 
-            // 💡 Als card.isFlipped true is, voegen we extra styling toe (styles.cardFlipped)
-            style={[styles.card, card.isFlipped && styles.cardFlipped]}
+            // 💡 Een kaart blijft wit als hij omgedraaid óf al geraden (isMatched) is!
+            style={[styles.card, (card.isFlipped || card.isMatched) && styles.cardFlipped]}
             activeOpacity={0.7}
-            // We roepen nu de nieuwe handleCardPress functie aan met het ID van de kaart
             onPress={() => handleCardPress(card.id)}
           >
-            {/* 💡 Als de kaart open is tonen we de naam (zonder 'BA ' zodat het past), anders een ❓ */}
-            <Text style={[styles.cardText, card.isFlipped && styles.cardTextFlipped]}>
-              {card.isFlipped ? card.name.replace('BA ', '') : '❓'}
+            <Text style={[styles.cardText, (card.isFlipped || card.isMatched) && styles.cardTextFlipped]}>
+              {card.isFlipped || card.isMatched ? card.name.replace('BA ', '') : '❓'}
             </Text>
           </TouchableOpacity>
         ))}
@@ -90,35 +137,10 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 16, color: '#495057' },
   bold: { fontWeight: 'bold', color: '#0056b3' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20 },
-  
-  // Standaard dichte blauwe kaart
-  card: { 
-    width: '23%', 
-    height: 80, 
-    backgroundColor: '#0056b3', 
-    borderRadius: 8, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginBottom: 10, 
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: '#004394'
-  },
+  card: { width: '23%', height: 80, backgroundColor: '#0056b3', borderRadius: 8, justifyContext: 'center', alignItems: 'center', marginBottom: 10, elevation: 3, borderWidth: 1, borderColor: '#004394', justifyContent: 'center' },
   cardText: { fontSize: 24, color: '#fff', fontWeight: 'bold' },
-  
-  // ✅ STYLING ALS DE KAART OPEN IS (Wit met blauwe letters)
-  cardFlipped: {
-    backgroundColor: '#fff',
-    borderColor: '#0056b3',
-  },
-  cardTextFlipped: {
-    fontSize: 9, // Lekker klein zodat lange namen zoals 'Basisverpleegkunde' netjes op het kaartje passen!
-    color: '#0056b3',
-    textAlign: 'center',
-    paddingHorizontal: 2,
-    fontWeight: 'bold',
-  },
-  
+  cardFlipped: { backgroundColor: '#fff', borderColor: '#0056b3' },
+  cardTextFlipped: { fontSize: 9, color: '#0056b3', textAlign: 'center', paddingHorizontal: 2, fontWeight: 'bold' },
   restartButton: { backgroundColor: '#212529', paddingVertical: 14, borderRadius: 10, alignItems: 'center', marginTop: 10, marginBottom: 30 },
   restartButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });
