@@ -7,6 +7,7 @@ import HomeScreen from './screens/HomeScreen';
 import ProductDetailsScreen from './screens/ProductDetailsScreen';
 import NewsDetailsScreen from './screens/NewsDetailsScreen';
 import CampusDetailsScreen from './screens/CampusDetailsScreen';
+import GameScreen from './screens/GameScreen';
 
 const Stack = createStackNavigator();
 
