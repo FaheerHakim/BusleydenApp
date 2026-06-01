@@ -9,7 +9,7 @@ export default function CampusDetails({ route, navigation }) {
 
   const ruweBeschrijving = item?.fieldData?.['beschrijving'] || 'Geen beschrijving beschikbaar voor deze campus.';
   
-  const description = ruweBeschrijving.replace(/<[^>]*>/g, '');
+  const beschrijving = ruweBeschrijving.replace(/<[^>]*>/g, '');
   
   const campusKleur = item?.fieldData?.kleur || '#0056b3';
 
