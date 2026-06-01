@@ -6,10 +6,12 @@ import {
 import { WEBFLOW_API_TOKEN } from '../config';
 import ProductCard from '../components/ProductCard';
 import NewsCard from '../components/NewsCard';
+import CampusCard from '../components/CampusCard';
 
 const SITE_ID = '6a0cb8dcdf02ab80c4c2b4de';
 const NEWS_COLLECTION_ID = '6a0f86111b7a24ea0e0ee305';
 const CATEGORY_COLLECTION_ID = '6a11a6d7562485b39b87f883';
+const CAMPUS_COLLECTION_ID = '6a0edafa08de0a82cfb2f155';
 
 const PRODUCT_SORT_OPTIONS = [
   { label: 'Naam A→Z', value: 'name_asc' },
@@ -27,6 +29,7 @@ export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [news, setNews] = useState([]);
   const [categories, setCategories] = useState({});
+  const [campuses, setCampuses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [productSearch, setProductSearch] = useState('');
@@ -64,9 +67,17 @@ export default function HomeScreen({ navigation }) {
         catMap[cat.id] = cat.fieldData?.name || cat.id;
       });
 
+      // ✅ Campus fetch toegevoegd
+      const campusRes = await fetch(
+        `https://api.webflow.com/v2/collections/${CAMPUS_COLLECTION_ID}/items`,
+        { headers: { Authorization: `Bearer ${WEBFLOW_API_TOKEN}` } }
+      );
+      const campusJson = await campusRes.json();
+
       setProducts(productJson.items || []);
       setNews(newsJson.items || []);
       setCategories(catMap);
+      setCampuses(campusJson.items || []);
     } catch (error) {
       console.error('Fout bij ophalen data:', error);
     } finally {
@@ -133,14 +144,12 @@ export default function HomeScreen({ navigation }) {
 
       {/* ── PRODUCTEN ── */}
       <Text style={styles.sectionTitle}>Onze Producten ({filteredProducts.length})</Text>
-
       <TextInput
         style={styles.searchInput}
         placeholder="🔍 Zoek een product..."
         value={productSearch}
         onChangeText={setProductSearch}
       />
-
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {PRODUCT_SORT_OPTIONS.map(opt => (
           <TouchableOpacity
@@ -154,7 +163,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {productCategories.map(cat => (
           <TouchableOpacity
@@ -168,7 +176,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       <View style={styles.listContainer}>
         {filteredProducts.length === 0 ? (
           <Text style={styles.emptyText}>Geen producten gevonden.</Text>
@@ -185,14 +192,12 @@ export default function HomeScreen({ navigation }) {
 
       {/* ── NIEUWS ── */}
       <Text style={styles.sectionTitle}>Laatste Nieuws ({filteredNews.length})</Text>
-
       <TextInput
         style={styles.searchInput}
         placeholder="🔍 Zoek een artikel..."
         value={newsSearch}
         onChangeText={setNewsSearch}
       />
-
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {NEWS_SORT_OPTIONS.map(opt => (
           <TouchableOpacity
@@ -206,7 +211,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
         {newsCategories.map(cat => (
           <TouchableOpacity
@@ -220,7 +224,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
       <View style={styles.listContainer}>
         {filteredNews.length === 0 ? (
           <Text style={styles.emptyText}>Geen artikelen gevonden.</Text>
@@ -234,6 +237,19 @@ export default function HomeScreen({ navigation }) {
           ))
         )}
       </View>
+
+      {/* ── CAMPUSSEN ── */}
+      <Text style={styles.sectionTitle}>Onze Campussen ({campuses.length})</Text>
+      <View style={styles.listContainer}>
+        {campuses.map((campus) => (
+          <CampusCard
+            key={campus.id}
+            item={campus}
+            onPress={() => navigation.navigate('CampusDetails', { item: campus })}
+          />
+        ))}
+      </View>
+
     </ScrollView>
   );
 }
@@ -264,4 +280,5 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#0056b3' },
   chipText: { fontSize: 13, color: '#495057' },
   chipTextActive: { color: '#fff', fontWeight: 'bold' },
-  emptyText: { textAlign: 'center', color: '#adb5bd', marginTop: 20, fontSize: 15 },});
+  emptyText: { textAlign: 'center', color: '#adb5bd', marginTop: 20, fontSize: 15 },
+});
