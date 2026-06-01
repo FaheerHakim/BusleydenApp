@@ -27,6 +27,9 @@ export default function NewsDetailsScreen({ route }) {
       <Text style={styles.date}>{formattedDate}</Text>
          ) : null}
         <Text style={styles.title}>{name}</Text>
+        {item.fieldData?.inhoud ? (
+        <Text style={styles.body}>{item.fieldData.inhoud}</Text>
+         ) : null}
       </View>
     </ScrollView>
   );
@@ -43,7 +46,7 @@ const styles = StyleSheet.create({
   placeholderText: { color: '#adb5bd', fontSize: 16 },
   content: { padding: 20 },
   title: { fontSize: 22, fontWeight: 'bold', color: '#1a1a1a' 
-    
+
   },
   date: {
   fontSize: 12,
@@ -51,5 +54,11 @@ const styles = StyleSheet.create({
   marginBottom: 8,
   textTransform: 'uppercase',
   fontWeight: '600',
+},
+body: {
+  fontSize: 15,
+  color: '#444',
+  lineHeight: 24,
+  marginTop: 15,
 },
 });
