@@ -141,6 +141,11 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.mainTitle}>Busleyden Atheneum</Text>
+      <TouchableOpacity style={styles.gameButton}
+        onPress={() => navigation.navigate('Game')}
+        activeOpacity={0.8}>
+        <Text style={styles.gameButtonText}>🎮 Start Campus Memory Game</Text>
+      </TouchableOpacity>
 
       {/* ── PRODUCTEN ── */}
       <Text style={styles.sectionTitle}>Onze Producten ({filteredProducts.length})</Text>
@@ -280,5 +285,38 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#0056b3' },
   chipText: { fontSize: 13, color: '#495057' },
   chipTextActive: { color: '#fff', fontWeight: 'bold' },
-  emptyText: { textAlign: 'center', color: '#adb5bd', marginTop: 20, fontSize: 15 },
+  emptyText: { textAlign: 'center', color: '#adb5bd', marginTop: 20, fontSize: 15 
+  },
+  mainTitle: { fontSize: 26, fontWeight: 'bold', textAlign: 'center', marginVertical: 20, color: '#1a1a1a' },
+  
+  // 🎨 STYLING VOOR JOUW NIEUWE SPEELKNOP:
+  gameButton: {
+    backgroundColor: '#0056b3', // Mooi schoolblauw
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  gameButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  sectionTitle: { 
+    fontSize: 22, 
+    fontWeight: 'bold', 
+    marginTop: 15, 
+    marginBottom: 10, 
+    color: '#212529', 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#dee2e6', 
+    paddingBottom: 5 
+  },
 });

@@ -18,6 +18,7 @@ export default function App() {
         <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} options={{ title: 'Product' }} />
         <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} options={{ title: 'Nieuwsartikel' }} />
         <Stack.Screen name="CampusDetails" component={CampusDetailsScreen} options={{ title: 'Campus' }} />
+        <Stack.Screen name="Game" component={GameScreen} options={{ title: 'Mini-Game' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
